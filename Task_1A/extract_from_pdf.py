@@ -1,7 +1,10 @@
 from PyPDF2 import PdfReader
 import pdfplumber
 
-file_path='/home/robotics-pc-20/Documents/Viswa/adobe_hackathon/test_pdfs/ME5083Lec22.pdf'
+# file_path='/home/robotics-pc-20/Documents/Viswa/adobe_hackathon/test_pdfs/ME5083Lec22.pdf'
+file_path='/home/robotics-pc-20/Documents/Viswa/adobe_hackathon/Adobe-India-Hackathon25/Challenge_1a/sample_dataset/pdfs/file03.pdf'
+
+
 # reader = PdfReader(file_path)
 # title = reader.metadata.title
 # print(title)

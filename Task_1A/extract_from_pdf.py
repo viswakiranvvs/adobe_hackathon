@@ -104,12 +104,12 @@ class Task_1A():
         h3_min_font = filtered_fonts[2] if len(filtered_fonts) > 3 else h2_min_font - 2
         h4_min_font = filtered_fonts[3] if len(filtered_fonts) > 4 else h3_min_font - 2
 
-        print("All fonts (desc):", all_fonts)
-        print("Filtered fonts (desc):", filtered_fonts)
-        print("Using h1_min_font:", h1_min_font)
-        print("Using h2_min_font:", h2_min_font)
-        print("Using h3_min_font:", h3_min_font)
-        print("Using h4_min_font:", h4_min_font)
+        # print("All fonts (desc):", all_fonts)
+        # print("Filtered fonts (desc):", filtered_fonts)
+        # print("Using h1_min_font:", h1_min_font)
+        # print("Using h2_min_font:", h2_min_font)
+        # print("Using h3_min_font:", h3_min_font)
+        # print("Using h4_min_font:", h4_min_font)
 
         return h1_min_font, h2_min_font, h3_min_font, h4_min_font
 
@@ -221,10 +221,7 @@ class Task_1A():
 
         return classified
     
-    def parseText(self,file_path):
-        # file_path='/Users/viswa/Documents/adobe/adobe_hackathon/Adobe-India-Hackathon25/Challenge_1a/sample_dataset/pdfs/file03.pdf'
-        # file_path='/Users/viswa/Documents/adobe/adobe_hackathon/test_pdfs/ME5083Lec22.pdf'
-
+    def parseText(self,file_path,extract_whole_text=False):
         font_sizes = set()
         lines_by_page_and_size = defaultdict(lambda: defaultdict(list))
 
@@ -312,7 +309,7 @@ class Task_1A():
             for fs, lines in sizes.items():
                 sizes_count[fs]+=len(sizes[fs])    
 
-        print(sizes_count)
+        # print(sizes_count)
 
         sentences_on_page1 = [
             {**line, "page": 1}
@@ -348,29 +345,46 @@ class Task_1A():
                 # print(sent)
 
         merged = self.merge_lines(all_lines)
-        for l in merged:
-            print(l['text'])
+        # for l in merged:
+            # print(l['text'])
 
-        h1_min_font, h2_min_font, h3_min_font, h4_min_font = self.determine_font_thresholds(self.merge_lines(all_lines))
+        h1_min_font, h2_min_font, h3_min_font, h4_min_font = self.determine_font_thresholds(merged)
 
     
 
         print("\n\n")
-        result = self.classify_headings(self.merge_lines(all_lines), None, h1_min_font, h2_min_font, h3_min_font, h4_min_font)
+        result = self.classify_headings(merged, None, h1_min_font, h2_min_font, h3_min_font, h4_min_font)
         # for item in result:
         #     if item.get("level") is not None and item.get("level") in ["H1","H2","H3","H4"]:
         #         print(f"Page {item['page']}, level {item['level']}: {item['text']}")
 
         # classified_lines = output from your classify_headings()
         # filter only those with a level
+
         outline = []
-        for line in result:
+        for idx, line in enumerate(result):
             if line.get("level") in ("H1", "H2", "H3", "H4"):
-                outline.append({
+                # outline.append({
+                #     "level": line["level"],
+                #     "text": self.clean_text(line["text"].strip()),
+                #     "page": line.get("page", 1)-1
+                # })
+                section = {
                     "level": line["level"],
                     "text": self.clean_text(line["text"].strip()),
                     "page": line.get("page", 1)-1
-                })
+                }
+
+                if extract_whole_text:
+                    # collect all following lines until next heading of same or higher level
+                    collected = []
+                    for next_line in result[idx+1:]:
+                        if next_line.get("level") in ("H1", "H2", "H3", "H4"):
+                            break
+                        collected.append(self.clean_text(next_line.get("text","")))
+                    section["content"] = "\n".join(collected)
+
+                outline.append(section)
 
         pdf_json = {
             "title": self.clean_text(self.title),
@@ -378,4 +392,9 @@ class Task_1A():
         }
 
         print(json.dumps(pdf_json, indent=2))
+        return pdf_json
 
+file_path='/Users/viswa/Documents/adobe/adobe_hackathon/Adobe-India-Hackathon25/Challenge_1a/sample_dataset/pdfs/file03.pdf'
+# file_path='/Users/viswa/Documents/adobe/adobe_hackathon/test_pdfs/ME5083Lec22.pdf'
+temp = Task_1A()
+temp.parseText(file_path,True)

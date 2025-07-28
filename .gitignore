@@ -1,7 +1,3 @@
-Adobe-India-Hackathon25/
-distilbert_local/
-layoutlmv3_local/
-sentence-transformers/
-t5-small/
+Adobe-India-Hackathon25/*.*
 Challenge_1a/__pycache__
-Task_1B/sllm/__pycache__
+Challenge_1b/__pycache__

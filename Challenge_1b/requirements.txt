@@ -1,0 +1,15 @@
+pdfplumber==0.11.7
+pdfminer.six==20250506
+PyPDF2==3.0.1
+pypdfium2==4.30.0
+
+sentence-transformers==5.0.0
+transformers==4.53.3
+torch==2.7.1
+sentencepiece==0.2.0
+tokenizers==0.21.2
+
+numpy==2.3.2
+requests==2.32.4
+tqdm==4.67.1
+typing_extensions==4.14.1

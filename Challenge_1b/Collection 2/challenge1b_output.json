@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "input_documents": [
+      "Learn Acrobat - Edit_2.pdf",
+      "Learn Acrobat - Share_2.pdf",
+      "Learn Acrobat - Edit_1.pdf",
+      "Learn Acrobat - Export_1.pdf",
+      "Learn Acrobat - Request e-signatures_1.pdf",
+      "Learn Acrobat - Generative AI_1.pdf",
+      "Learn Acrobat - Share_1.pdf",
+      "Learn Acrobat - Fill and Sign.pdf",
+      "Learn Acrobat - Export_2.pdf",
+      "The Ultimate PDF Sharing Checklist.pdf",
+      "Learn Acrobat - Create and Convert_2.pdf",
+      "Learn Acrobat - Create and Convert_1.pdf",
+      "Learn Acrobat - Request e-signatures_2.pdf",
+      "Learn Acrobat - Generative AI_2.pdf"
+    ],
+    "persona": "HR professional",
+    "job_to_be_done": "Create and manage fillable forms for onboarding and compliance.",
+    "processing_timestamp": "2025-07-28T19:46:32.111967"
+  },
+  "extracted_sections": [
+    {
+      "document": "Learn Acrobat - Fill and Sign.pdf",
+      "section_title": "Print forms",
+      "importance_rank": 1,
+      "page_number": 13
+    },
+    {
+      "document": "Learn Acrobat - Fill and Sign.pdf",
+      "section_title": "Save forms",
+      "importance_rank": 2,
+      "page_number": 12
+    },
+    {
+      "document": "Learn Acrobat - Generative AI_2.pdf",
+      "section_title": "PDF services for user profiles.",
+      "importance_rank": 3,
+      "page_number": 16
+    },
+    {
+      "document": "Learn Acrobat - Fill and Sign.pdf",
+      "section_title": "Fill in PDF Forms",
+      "importance_rank": 4,
+      "page_number": 7
+    },
+    {
+      "document": "Learn Acrobat - Fill and Sign.pdf",
+      "section_title": "Types of PDF forms",
+      "importance_rank": 5,
+      "page_number": 1
+    }
+  ],
+  "subsection_analysis": [
+    {
+      "document": "Learn Acrobat - Fill and Sign.pdf",
+      "refined_text": "Print this file1. Select from the upper right. Print2. Choose an appropriate printer in the dialog box. Comments And Forms OK3. Select one of the following, and then select one of the following.",
+      "page_number": 13
+    },
+    {
+      "document": "Learn Acrobat - Fill and Sign.pdf",
+      "refined_text": "save As File Save To save the completed form, choose from the hamburger menu ( > \u2022 As in macOS) and rename the file. to remove extended Acrobat Reader features, choose one of the following.",
+      "page_number": 12
+    },
+    {
+      "document": "Learn Acrobat - Generative AI_2.pdf",
+      "refined_text": "Acrobat Classic does not support AI Assistant. you can manage the deployment of Acrobat AI Assistant through the Admin Console. the users must restart Acrobat to see AI Assistant.",
+      "page_number": 16
+    },
+    {
+      "document": "Learn Acrobat - Fill and Sign.pdf",
+      "refined_text": "forms are filledableinteractive forms. form creators intentionally design a form that you can fill in only by hand. form is filledableinteractive forms interactiveAn form contains fields that you can select or fill in.",
+      "page_number": 7
+    },
+    {
+      "document": "Learn Acrobat - Fill and Sign.pdf",
+      "refined_text": "the Fill & Sign tool automatically detects the form fields. you can manually add text and other symbols anywhere on the form. you can complete the forms by entering information and adding your signatures.",
+      "page_number": 1
+    }
+  ]
+}

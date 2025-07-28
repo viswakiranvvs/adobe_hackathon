@@ -61,6 +61,7 @@ class Task_1A():
         # Rule 1: On first page and has largest font
         largest_font = max(fontsCount.keys())
         if sentence['page'] == 1 and abs(sentence['font'] - largest_font) < 1e-2:
+            # print("Title detected")
             return True
 
         # Rule 2: All fonts same size in the document
@@ -113,7 +114,7 @@ class Task_1A():
 
         return h1_min_font, h2_min_font, h3_min_font, h4_min_font
 
-    def merge_lines(self,lines, x_tolerance=5, y_gap_tolerance=50):
+    def merge_lines(self,lines, x_tolerance=5, y_gap_tolerance=20):
         """
         Merge consecutive lines with same font and similar left padding.
         lines: list of dicts with keys ['text', 'font', 'x0', 'x1', 'top', 'page']
@@ -132,9 +133,10 @@ class Task_1A():
             same_page = next_line['page'] == current['page']
             same_font = abs(float(next_line['font']) - float(current['font'])) < 0.1
             same_left = abs(float(next_line['x0']) - float(current['x0'])) <= x_tolerance
+            same_bold = next_line['bold'] == current['bold']
             vertical_gap = float(next_line['top']) - float(current['top'])
 
-            if same_page and same_font and same_left and 0 < vertical_gap <= y_gap_tolerance:
+            if next_line['text']!="" and same_bold and same_page and same_font and same_left and 0 < vertical_gap <= y_gap_tolerance:
                 # merge
                 current['text'] = current['text'].rstrip() + " " + next_line['text'].lstrip()
                 # update rightmost x1 and top for group
@@ -149,18 +151,26 @@ class Task_1A():
         merged.append(current)
         return merged
     
-    def classify_headings(self,lines, page_width, h1_min_font, h2_min_font, h3_min_font, h4_min_font):
+    def classify_headings(self, lines, page_width, h1_min_font, h2_min_font, h3_min_font, h4_min_font):
         if page_width is None:
-            # estimate page width as max x1
             page_width = max(float(line['x1']) for line in lines if 'x1' in line)
+
+
+        # Collect font size stats
+        font_sizes = [float(line.get('font', 0)) for line in lines if line.get('text', '').strip()]
+        most_common_font_size = max(set(font_sizes), key=font_sizes.count)
+
+        # Count bolds
+        # bold_count = sum(1 for line in lines if line['bold'])
 
         classified = []
         current_h1_font = None
         current_h2_font = None
         current_h3_font = None
-
         last_h3_x0 = None
         last_h4_x0 = None
+        last_h1_x0 = None
+        last_h2_x0 = None
 
         for line in lines:
             text = line.get('text', '').strip()
@@ -168,59 +178,82 @@ class Task_1A():
             x0 = float(line.get('x0', 0))
             x1 = float(line.get('x1', 0))
             right_padding = page_width - x1
+            is_line_bold = line['bold']
 
-            if not text:
+            if not text or text == self.title:
                 classified.append({**line, "level": None})
-                continue
-
-            if text==self.title:
                 continue
 
             level = None
 
-            # H1 detection
-            if h1_min_font and font >= h1_min_font and right_padding > 50:
-                level = "H1"
-                current_h1_font = font
-                current_h2_font = None
-                current_h3_font = None
-                # reset indent tracking
-                last_h3_x0 = None
-                last_h4_x0 = None
+            # If font size is meaningful, apply normal logic
+            if font != most_common_font_size:
+                if h1_min_font and font >= h1_min_font and right_padding > 50:
+                    level = "H1"
+                    current_h1_font = font
+                    last_h1_x0=x0
+                    current_h2_font = None
+                    current_h3_font = None
+                    last_h3_x0 = None
+                    last_h4_x0 = None
+                    last_h2_x0 = None
 
-            # H2 detection
-            elif (h2_min_font and current_h1_font and font < current_h1_font 
-                and font >= h2_min_font and right_padding > 50):
-                level = "H2"
-                current_h2_font = font
-                current_h3_font = None
-                last_h3_x0 = None
-                last_h4_x0 = None
+                elif h2_min_font and current_h1_font and font < current_h1_font and font >= h2_min_font and right_padding > 50:
+                    level = "H2"
+                    current_h2_font = font
+                    current_h3_font = None
+                    last_h3_x0 = None
+                    last_h4_x0 = None
+                    last_h2_x0=x0
 
-            # H3 detection
-            # H3 detection
-            elif h3_min_font and current_h2_font and font < current_h2_font and font >= h3_min_font and right_padding > 50:
-                if last_h3_x0 is None or abs(last_h3_x0 - x0) < 4:
-                    level = "H3"
-                    current_h3_font = font
-                    if last_h3_x0:
-                        last_h3_x0 = min(x0,last_h3_x0)
-                    else:
-                        last_h3_x0=x0
+                elif h3_min_font and current_h2_font and font < current_h2_font and font >= h3_min_font and right_padding > 50:
+                    if last_h3_x0 is None or abs(last_h3_x0 - x0) < 4:
+                        level = "H3"
+                        current_h3_font = font
+                        last_h3_x0 = x0 if last_h3_x0 is None else min(x0, last_h3_x0)
 
-            # H4 detection
-            elif h4_min_font and current_h3_font and font < current_h3_font and font >= h4_min_font and right_padding > 50:
-                if last_h4_x0 is None or abs(last_h4_x0 - x0) < 4:
-                    level = "H4"
-                    if last_h4_x0:
-                        last_h4_x0 = min(x0,last_h4_x0)
-                    else:
-                        last_h4_x0=x0
+                elif h4_min_font and current_h3_font and font < current_h3_font and font >= h4_min_font and right_padding > 50:
+                    if last_h4_x0 is None or abs(last_h4_x0 - x0) < 4:
+                        level = "H4"
+                        last_h4_x0 = x0 if last_h4_x0 is None else min(x0, last_h4_x0)
+
+            # Otherwise, fall back to bold-based classification
+            elif is_line_bold and right_padding > 50:
+                if (not current_h1_font or font==current_h1_font) and (not last_h1_x0 or abs(last_h1_x0-x0)<2):
+                    level = "H1"
+                    current_h1_font = font
+                    last_h1_x0=x0
+                    current_h2_font = None
+                    current_h3_font = None
+                    last_h3_x0 = None
+                    last_h4_x0 = None
+                    last_h2_x0 = None
+                elif (not current_h2_font or font==current_h2_font) and (not last_h2_x0 or abs(last_h2_x0-x0)<2):
+                    level = "H2"
+                    current_h2_font = font
+                    last_h2_x0=x0
+                    current_h3_font = None
+                    last_h3_x0 = None
+                    last_h4_x0 = None
+                elif not current_h3_font:
+                    if last_h3_x0 is None or abs(last_h3_x0 - x0) < 4:
+                        level = "H3"
+                        current_h3_font = font
+                        last_h3_x0 = x0
+                else:
+                    if last_h4_x0 is None or abs(last_h4_x0 - x0) < 4:
+                        level = "H4"
+                        last_h4_x0 = x0
 
             classified.append({**line, "level": level})
 
         return classified
+
     
+    def is_bold(self,fontname):
+        bold_keywords = ['bold', 'black', 'heavy', 'extrabold', 'semibold']
+        return any(kw in fontname.lower() for kw in bold_keywords)
+
     def parseText(self,file_path,extract_whole_text=False):
         font_sizes = set()
         lines_by_page_and_size = defaultdict(lambda: defaultdict(list))
@@ -234,6 +267,8 @@ class Task_1A():
                     fs = round(char["size"], 2)
                     chars_by_size[fs].append(char)
                     font_sizes.add(fs)
+                    # print(char)
+                    # break
                 for fs, chars in chars_by_size.items():
                     # Sort to group by lines (top) and reading order (x0)
                     chars = sorted(chars, key=lambda c: (c["top"], c["x0"]))
@@ -243,6 +278,7 @@ class Task_1A():
                     line_threshold = 2  # adjust for your PDF if needed
 
                     for char in chars:
+                        isBold = False
                         if last_top is not None and abs(char["top"] - last_top) > line_threshold:
                             if current_line:
                                 # Collect attributes for this line
@@ -259,13 +295,16 @@ class Task_1A():
                                             line_text += " "
                                     line_text += c["text"]
                                     prev_char = c
+                                isBold = self.is_bold(current_line[0]["fontname"])
+                                # if line_text.strip()!="":
                                 lines.append({
                                     "text": line_text.strip(),
                                     "top": line_top,
                                     "x0": line_x0,
                                     "x1": line_x1,
                                     "page": page_num,
-                                    "font": fs
+                                    "font": fs,
+                                    "bold": isBold
                                 })
                             current_line = []
                         current_line.append(char)
@@ -277,6 +316,8 @@ class Task_1A():
                         line_x1 = max(c["x1"] for c in current_line)
                         line_text = ""
                         prev_char = None
+                        isBold = False
+                        isBold = self.is_bold(current_line[0]["fontname"])
                         for c in current_line:
                             if prev_char is not None:
                                 gap = c["x0"] - prev_char["x1"]
@@ -284,23 +325,25 @@ class Task_1A():
                                     line_text += " "
                             line_text += c["text"]
                             prev_char = c
+                        # if line_text.strip()!="":
                         lines.append({
                             "text": line_text.strip(),
                             "top": line_top,
                             "x0": line_x0,
                             "x1": line_x1,
                             "page": page_num,
-                            "font": fs
+                            "font": fs,
+                            "bold": isBold
                         })
                     lines_by_page_and_size[page_num][fs] = lines
 
         # Example output per page and font size
         # for page_num, sizes in lines_by_page_and_size.items():
-        #     print(f"\nPage {page_num}:")
+            # print(f"\nPage {page_num}:")
         #     for fs, lines in sizes.items():
-        #         print(f"  Font size {fs}:")
+                # print(f"  Font size {fs}:")
         #         for line in lines:
-        #             print(f"    {line}")
+                    # print(f"    {line}")
 
         sizes_count=dict()
         for s in font_sizes:
@@ -324,11 +367,11 @@ class Task_1A():
         # Usage example:
         # subtitle_sentence = find_subtitle(sentences_on_page1, fontsCount, title_sentence)
         # if subtitle_sentence:
-        #     print("Subtitle found:", subtitle_sentence['text'])
+            # print("Subtitle found:", subtitle_sentence['text'])
         # else:
-        #     print("No subtitle detected.")
+            # print("No subtitle detected.")
 
-        print("\n\n")
+        # print("\n\n")
 
         all_lines = [
             {**line, "page": page_num}
@@ -338,11 +381,12 @@ class Task_1A():
         ]
 
         for sent in sentences_on_page1:
-            if self.is_title(sent,fontsCount=sizes_count,sentences_on_page1=sentences_on_page1):
+            if sent['text']!="" and self.is_title(sent,fontsCount=sizes_count,sentences_on_page1=sentences_on_page1):
                 sent['level']='title'
                 self.title=sent['text']
                 # all_lines
                 # print(sent)
+                break
 
         merged = self.merge_lines(all_lines)
         # for l in merged:
@@ -350,51 +394,66 @@ class Task_1A():
 
         h1_min_font, h2_min_font, h3_min_font, h4_min_font = self.determine_font_thresholds(merged)
 
-    
 
-        print("\n\n")
+
+        # print("\n\n")
         result = self.classify_headings(merged, None, h1_min_font, h2_min_font, h3_min_font, h4_min_font)
         # for item in result:
         #     if item.get("level") is not None and item.get("level") in ["H1","H2","H3","H4"]:
-        #         print(f"Page {item['page']}, level {item['level']}: {item['text']}")
+                # print(f"Page {item['page']}, level {item['level']}: {item['text']}")
 
         # classified_lines = output from your classify_headings()
         # filter only those with a level
 
         outline = []
+        special_heading_chars = {"•", "-", "*", "–", "—"}
+
         for idx, line in enumerate(result):
-            if line.get("level") in ("H1", "H2", "H3", "H4"):
-                # outline.append({
-                #     "level": line["level"],
-                #     "text": self.clean_text(line["text"].strip()),
-                #     "page": line.get("page", 1)-1
-                # })
+            level = line.get("level")
+            text = self.clean_text(line.get("text", "").strip())
+            page = line.get("page", 1) - 1
+
+            is_heading = level in ("H1", "H2", "H3", "H4")
+            is_symbol_heading = is_heading and text in special_heading_chars
+
+            if is_heading and not is_symbol_heading:
                 section = {
-                    "level": line["level"],
-                    "text": self.clean_text(line["text"].strip()),
-                    "page": line.get("page", 1)-1
+                    "level": level,
+                    "text": text,
+                    "page": page
                 }
 
                 if extract_whole_text:
-                    # collect all following lines until next heading of same or higher level
                     collected = []
-                    for next_line in result[idx+1:]:
-                        if next_line.get("level") in ("H1", "H2", "H3", "H4"):
+                    for next_line in result[idx + 1:]:
+                        next_level = next_line.get("level")
+                        next_text = self.clean_text(next_line.get("text", "").strip())
+                        next_is_symbol = next_text in special_heading_chars
+                        if next_level in ("H1", "H2", "H3", "H4") and not next_is_symbol:
                             break
-                        collected.append(self.clean_text(next_line.get("text","")))
+                        collected.append(self.clean_text(next_line.get("text", "")))
+
                     section["content"] = "\n".join(collected)
 
                 outline.append(section)
+
+            elif is_symbol_heading and extract_whole_text and outline:
+                # Merge content into previous section
+                prev_section = outline[-1]
+                symbol_content = line.get("content", "").strip()
+                if symbol_content:
+                    prev_section["content"] += f"\n{symbol_content}"
+
 
         pdf_json = {
             "title": self.clean_text(self.title),
             "outline": outline
         }
 
-        print(json.dumps(pdf_json, indent=2))
+        # print(json.dumps(pdf_json, indent=2))
         return pdf_json
 
-file_path='/Users/viswa/Documents/adobe/adobe_hackathon/Adobe-India-Hackathon25/Challenge_1a/sample_dataset/pdfs/file03.pdf'
-# file_path='/Users/viswa/Documents/adobe/adobe_hackathon/test_pdfs/ME5083Lec22.pdf'
+# file_path='/Users/viswa/Documents/adobe/adobe_hackathon/Adobe-India-Hackathon25/Challenge_1a/sample_dataset/pdfs/file03.pdf'
+file_path='/Users/viswa/Documents/adobe/adobe_hackathon/Adobe-India-Hackathon25/Challenge_1b/Collection 1/PDFs/South of France - Cuisine.pdf'
 temp = Task_1A()
 temp.parseText(file_path,True)

@@ -61,9 +61,9 @@ Carcassonne’s fortified walls and Avignon’s papal history are highlights."""
 # all_sections = [ ... ]  # (paste your sample here)
 class Task_1B():
     def __init__(self):
-        self.embed_model = SentenceTransformer('/Users/viswa/Documents/adobe/adobe_hackathon/sentence-transformers/all-MiniLM-L6-v2')  # ~80MB
-        self.tokenizer = T5Tokenizer.from_pretrained('/Users/viswa/Documents/adobe/adobe_hackathon/t5-small')
-        self.summarizer = T5ForConditionalGeneration.from_pretrained('/Users/viswa/Documents/adobe/adobe_hackathon/t5-small')
+        self.embed_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')  # ~80MB
+        self.tokenizer = T5Tokenizer.from_pretrained('t5-small')
+        self.summarizer = T5ForConditionalGeneration.from_pretrained('t5-small')
         self.summarizer.to('cpu')  # ensure CPU
     
     # ========== Summarize top N ==========
@@ -114,12 +114,12 @@ class Task_1B():
         }
 
         # Print or save
-        print(json.dumps(output, indent=4))
+        # print(json.dumps(output, indent=4))
         return output
 
 
-persona = "Travel Planner"
-job = "Plan a trip of 4 days for a group of 10 college friends"
+# persona = "Travel Planner"
+# job = "Plan a trip of 4 days for a group of 10 college friends"
 
-node = Task_1B()
-node.process_sections(all_sections,persona,job)
+# node = Task_1B()
+# node.process_sections(all_sections,persona,job)

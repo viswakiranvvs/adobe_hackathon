@@ -1,0 +1,14 @@
+certifi==2025.7.14
+cffi==1.17.1
+charset-normalizer==3.4.2
+hf-xet==1.1.5
+idna==3.10
+joblib==1.5.1
+pdfminer.six==20250506
+pdfplumber==0.11.7
+pycparser==2.22
+PyPDF2==3.0.1
+pypdfium2==4.30.0
+PyYAML==6.0.2
+regex==2024.11.6
+typing_extensions==4.14.1

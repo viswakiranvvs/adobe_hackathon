@@ -3,3 +3,5 @@ distilbert_local/
 layoutlmv3_local/
 sentence-transformers/
 t5-small/
+Challenge_1a/__pycache__
+Task_1B/sllm/__pycache__

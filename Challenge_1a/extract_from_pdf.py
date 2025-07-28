@@ -454,6 +454,6 @@ class Task_1A():
         return pdf_json
 
 # file_path='/Users/viswa/Documents/adobe/adobe_hackathon/Adobe-India-Hackathon25/Challenge_1a/sample_dataset/pdfs/file03.pdf'
-file_path='/Users/viswa/Documents/adobe/adobe_hackathon/Adobe-India-Hackathon25/Challenge_1b/Collection 1/PDFs/South of France - Cuisine.pdf'
-temp = Task_1A()
-temp.parseText(file_path,True)
+# file_path='/Users/viswa/Documents/adobe/adobe_hackathon/Adobe-India-Hackathon25/Challenge_1b/Collection 1/PDFs/South of France - Cuisine.pdf'
+# temp = Task_1A()
+# temp.parseText(file_path,True)
